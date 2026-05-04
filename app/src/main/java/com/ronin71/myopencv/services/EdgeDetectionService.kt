@@ -14,13 +14,6 @@ import java.util.ArrayList
  */
 object EdgeDetectionService {
     val TAG = "OutlineProcessor"
-    init {
-        if (OpenCVLoader.initLocal()) {
-            Log.d("OutlineProcessor", "OpenCV initialized successfully")
-        } else {
-            Log.e("OutlineProcessor", "OpenCV initialization failed")
-        }
-    }
 
     /**
      * [bitmap] : Kiểm tra bitmap truyền vào xem có alpha hay không

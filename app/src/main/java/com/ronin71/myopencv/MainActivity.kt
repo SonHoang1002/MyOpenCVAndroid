@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -28,12 +29,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
+import com.ronin71.myopencv.services.BackgroundRemoveService
 import com.ronin71.myopencv.services.EdgeDetectionService
 import com.ronin71.myopencv.services.ObjectDetectionService
 import com.ronin71.myopencv.ui.theme.MyOpenCVTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.opencv.android.OpenCVLoader
 
 
 val BgDeep        = Color(0xFF0A0A0F)
@@ -61,7 +64,13 @@ class MainActivity : ComponentActivity() {
 fun CVLabApp() {
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Edge Detection", "Object Detection")
-
+    LaunchedEffect(Unit) {
+        if (OpenCVLoader.initLocal()) {
+            Log.d("OutlineProcessor", "OpenCV initialized successfully")
+        } else {
+            Log.e("OutlineProcessor", "OpenCV initialization failed")
+        }
+    }
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = BgDeep,
@@ -88,7 +97,7 @@ fun CVLabApp() {
             ) { tab ->
                 when (tab) {
                     0 -> EdgeDetectionTab()
-                    1 -> ObjectDetectionTab()
+                    1 -> BackgroundRemoveTab()
                 }
             }
         }
@@ -260,7 +269,7 @@ fun EdgeDetectionTab() {
 
 // ─── Object Detection Tab ─────────────────────────────────────────────────────
 @Composable
-fun ObjectDetectionTab() {
+fun BackgroundRemoveTab() {
     var sourceBitmap  by remember { mutableStateOf<Bitmap?>(null) }
     var resultBitmap  by remember { mutableStateOf<Bitmap?>(null) }
     var isProcessing  by remember { mutableStateOf(false) }
@@ -285,12 +294,16 @@ fun ObjectDetectionTab() {
 
                 sourceBitmap = bmp
 
-                // Object detection: foreground = white, background = black
-                // Keeps original size and quality
                 val result = withContext(Dispatchers.Default) {
-                    ObjectDetectionService.generateObjectMask(bmp)
+                    BackgroundRemoveService().handle(
+                        bmp,
+                        {it -> resultBitmap = it},
+                        {e ->
+                            errorMsg = e.message
+                        }
+                    )
                 }
-                resultBitmap = result
+
             } catch (e: Exception) {
                 errorMsg = e.message
             } finally {
@@ -300,12 +313,12 @@ fun ObjectDetectionTab() {
     }
 
     ProcessingTabLayout(
-        tabTitle       = "Object Detection",
-        tabDescription = "Detects foreground objects and generates a binary mask.\nWhite = object, Black = background.",
+        tabTitle       = "Background Remove",
+        tabDescription = "Remove background and generates a binary mask.\nWhite = object, Black = background.",
         accentColor    = AccentPurple,
         sourceBitmap   = sourceBitmap,
         resultBitmap   = resultBitmap,
-        resultLabel    = "Object Binary Mask",
+        resultLabel    = "Background Remove Mask",
         isProcessing   = isProcessing,
         errorMsg       = errorMsg,
         onPickImage    = { picker.launch("image/*") },

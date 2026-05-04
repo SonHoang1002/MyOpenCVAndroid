@@ -1,6 +1,7 @@
 package com.ronin71.myopencv.services
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import org.opencv.android.Utils
 import org.opencv.core.Core
 import org.opencv.core.CvType
@@ -10,9 +11,63 @@ import org.opencv.core.Scalar
 import org.opencv.core.Size
 import org.opencv.imgproc.Imgproc
 import androidx.core.graphics.createBitmap
+import org.opencv.core.MatOfPoint
+import org.opencv.core.Point
 
 object ObjectDetectionService {
+    fun detectObjects(bitmap:Bitmap): Bitmap {
+        return try {
+            val mat  = Mat()
+             Utils.bitmapToMat(bitmap, mat)
 
+            if (mat.empty()) {
+                return bitmap
+            }
+
+            // Chuyển đổi sang ảnh xám
+            val grayMat = Mat()
+            Imgproc.cvtColor(mat, grayMat, Imgproc.COLOR_BGR2GRAY)
+
+            // Phát hiện cạnh bằng Canny
+            val edgesMat = Mat()
+            Imgproc.Canny(grayMat, edgesMat, 50.0, 150.0)
+
+            // Tìm contours (viền của đối tượng)
+            val contours = ArrayList<MatOfPoint>()
+            val hierarchy = Mat()
+            Imgproc.findContours(
+                edgesMat, contours, hierarchy,
+                Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE
+            )
+
+            // Vẽ contours lên ảnh gốc
+//            for (contour in contours) {
+//                val rect = Imgproc.boundingRect(contour)
+//                // Lọc bỏ các vùng quá nhỏ (nhiễu)
+//                if (rect.area() > 1000) {
+//                    Imgproc.rectangle(
+//                        mat, rect,
+//                        Scalar(0.0, 255.0, 0.0), 2
+//                    )
+//
+////                    // Thêm text label nếu cần
+////                    Imgproc.putText(
+////                        mat, "Object",
+////                        Point(rect.x.toDouble(), rect.y.toDouble() - 5.0),
+////                        Imgproc.FONT_HERSHEY_SIMPLEX,
+////                        0.8, Scalar(0.0, 255.0, 0.0), 2
+////                    )
+//                }
+//            }
+            val targetBitmap = createBitmap(bitmap.width, bitmap.height)
+            Utils.matToBitmap(mat,targetBitmap )
+            targetBitmap
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            bitmap
+        }
+    }
     /**
      * Tự động detect object và tạo binary mask:
      *   - Ảnh có alpha (PNG transparent) → dùng alpha channel trực tiếp
