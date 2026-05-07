@@ -1,7 +1,6 @@
-package com.ronin71.myopencv.services
+package com.ronin71.myopencv.services.photo
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import org.opencv.android.Utils
 import org.opencv.core.Core
 import org.opencv.core.CvType
@@ -12,9 +11,8 @@ import org.opencv.core.Size
 import org.opencv.imgproc.Imgproc
 import androidx.core.graphics.createBitmap
 import org.opencv.core.MatOfPoint
-import org.opencv.core.Point
 
-object ObjectDetectionService {
+object PhotoObjectDetectionService {
     fun detectObjects(bitmap:Bitmap): Bitmap {
         return try {
             val mat  = Mat()

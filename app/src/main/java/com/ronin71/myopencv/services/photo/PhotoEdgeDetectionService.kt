@@ -1,18 +1,17 @@
-package com.ronin71.myopencv.services
+package com.ronin71.myopencv.services.photo
 
 import android.graphics.Bitmap
 import org.opencv.android.Utils
 import org.opencv.core.*
 import org.opencv.imgproc.Imgproc
 import androidx.core.graphics.createBitmap
-import org.opencv.android.OpenCVLoader
 import android.util.Log
 import java.util.ArrayList
 
 /**
  *
  */
-object EdgeDetectionService {
+object PhotoEdgeDetectionService {
     val TAG = "OutlineProcessor"
 
     /**

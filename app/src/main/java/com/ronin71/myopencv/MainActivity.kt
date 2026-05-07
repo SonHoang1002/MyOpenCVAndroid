@@ -29,9 +29,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
-import com.ronin71.myopencv.services.BackgroundRemoveService
-import com.ronin71.myopencv.services.EdgeDetectionService
-import com.ronin71.myopencv.services.ObjectDetectionService
+import com.ronin71.myopencv.services.photo.PhotoBackgroundRemoveService
+import com.ronin71.myopencv.services.photo.PhotoEdgeDetectionService
 import com.ronin71.myopencv.ui.theme.MyOpenCVTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -243,7 +242,7 @@ fun EdgeDetectionTab() {
 
                 // Process on IO thread, keep original size & quality
                 val result = withContext(Dispatchers.Default) {
-                    EdgeDetectionService.generateContourEdgeImage(bmp, thickness = 1)
+                    PhotoEdgeDetectionService.generateContourEdgeImage(bmp, thickness = 1)
                 }
                 resultBitmap = result
             } catch (e: Exception) {
@@ -295,7 +294,7 @@ fun BackgroundRemoveTab() {
                 sourceBitmap = bmp
 
                 val result = withContext(Dispatchers.Default) {
-                    BackgroundRemoveService().handle(
+                    PhotoBackgroundRemoveService().handle(
                         bmp,
                         {it -> resultBitmap = it},
                         {e ->
